@@ -1,7 +1,7 @@
 package com.adplay.pled.rxweather.presenter;
 
 import com.adplay.pled.rxweather.common.BasePresenter;
-import com.adplay.pled.rxweather.model.weatherModel;
+import com.adplay.pled.rxweather.model.WeatherModel;
 import com.adplay.pled.rxweather.retrofit.ApiCallBack;
 import com.adplay.pled.rxweather.retrofit.ApiStores;
 import com.adplay.pled.rxweather.view.MainView;
@@ -15,9 +15,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
     public void getWeatherByIp(String ip){
         mvpView.showLoading();
-        addSubscription(apiStores.getWeatherByIp(ApiStores.KEY, ip), new ApiCallBack<weatherModel>() {
+        addSubscription(apiStores.getWeatherByIp(ApiStores.KEY, ip), new ApiCallBack<WeatherModel>() {
             @Override
-            public void onSuccess(weatherModel model) {
+            public void onSuccess(WeatherModel model) {
                 mvpView.getDataSuccess(model);
             }
 

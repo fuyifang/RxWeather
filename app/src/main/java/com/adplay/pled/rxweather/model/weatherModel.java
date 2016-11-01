@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by PLED on 2016/10/28.
  */
-public class weatherModel {
+public class WeatherModel {
 
 
     private String retCode;
