@@ -3,6 +3,7 @@ package com.adplay.pled.rxweather;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -12,6 +13,8 @@ import com.adplay.pled.rxweather.model.WeatherModel;
 import com.adplay.pled.rxweather.presenter.MainPresenter;
 import com.adplay.pled.rxweather.view.MainView;
 import com.adplay.pled.rxweather.widget.BlurredView;
+import com.adplay.pled.rxweather.widget.IndexHorizontalScrollView;
+import com.adplay.pled.rxweather.widget.Today24HourView;
 
 public class MainActivity extends BaseActivity implements MainView {
     MainPresenter mPresenter;
@@ -19,7 +22,8 @@ public class MainActivity extends BaseActivity implements MainView {
     private RecyclerView mRecyclerView;
     private BlurredView mBlurredView;
     private TextView txt_address;
-
+    private Today24HourView hourView;
+    private IndexHorizontalScrollView indexHorizontalScrollView;
     private int mScrollerY;
 
     private int mAlpha;
@@ -35,8 +39,11 @@ public class MainActivity extends BaseActivity implements MainView {
     }
 
     private void initView() {
+//        hourView = (Today24HourView) findViewById(R.id.hourView);
+//        indexHorizontalScrollView = (IndexHorizontalScrollView) findViewById(R.id.scrollview);
         txt_address = (TextView) findViewById(R.id.txt_address);
-        mRecyclerView = (RecyclerView) findViewById(R.id.weather_info);
+//        indexHorizontalScrollView.setToday24HourView(hourView);
+               mRecyclerView = (RecyclerView) findViewById(R.id.weather_info);
         mBlurredView = (BlurredView) findViewById(R.id.blurview);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -75,6 +82,7 @@ public class MainActivity extends BaseActivity implements MainView {
     @Override
     public void getDataFail(String msg) {
         showToast("网络不给力"+msg);
+        Log.e("Tag",msg);
 
     }
 

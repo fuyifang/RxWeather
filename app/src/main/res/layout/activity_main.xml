@@ -43,6 +43,18 @@
                 android:textSize="10sp"/>
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
+    <!--<com.adplay.pled.rxweather.widget.IndexHorizontalScrollView-->
+        <!--android:id="@+id/scrollview"-->
+        <!--android:fadeScrollbars="false"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<com.adplay.pled.rxweather.widget.Today24HourView-->
+            <!--android:id="@+id/hourView"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent" />-->
+
+    <!--</com.adplay.pled.rxweather.widget.IndexHorizontalScrollView>-->
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/weather_info"

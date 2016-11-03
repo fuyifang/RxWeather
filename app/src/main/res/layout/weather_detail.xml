@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="400dp">
+    <com.adplay.pled.rxweather.widget.IndexHorizontalScrollView
+        android:id="@+id/index_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.adplay.pled.rxweather.widget.Today24HourView
+            android:id="@+id/hourView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.adplay.pled.rxweather.widget.IndexHorizontalScrollView>
+</LinearLayout>

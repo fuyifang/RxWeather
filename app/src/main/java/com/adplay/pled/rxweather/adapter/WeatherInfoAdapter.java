@@ -1,7 +1,6 @@
 package com.adplay.pled.rxweather.adapter;
 
 import android.content.Context;
-import android.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +10,8 @@ import android.widget.TextView;
 
 import com.adplay.pled.rxweather.R;
 import com.adplay.pled.rxweather.model.WeatherModel;
+import com.adplay.pled.rxweather.widget.IndexHorizontalScrollView;
+import com.adplay.pled.rxweather.widget.Today24HourView;
 
 /**
  * Recycler adapter
@@ -24,6 +25,7 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
+    private static final int TYPE_DETAIL = 2;
 
     private WeatherModel mWeatherModel;
 
@@ -35,17 +37,26 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
-            return new HeaderHolder(LayoutInflater.from(context).inflate(R.layout.recyclerview_header, parent, false));
+            return new HeaderHolder(LayoutInflater.from(context).inflate(R.layout.weather_header, parent, false));
+        }else if (viewType==TYPE_DETAIL){
+            return new DetailHolder(LayoutInflater.from(context).inflate(R.layout.weather_detail,parent,false));
         }
-        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.recyclerview_item, parent, false));
+        return new InfoHolder(LayoutInflater.from(context).inflate(R.layout.weather_info, parent, false));
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Log.e("Tag",getItemViewType(position)+"itemtype");
         switch (getItemViewType(position)){
-            case 0:
+            case TYPE_HEADER:
                 HeaderHolder headerHolder = (HeaderHolder) holder;
                 headerHolder.txt_temperature.setText(mWeatherModel.getResult().get(0).getTemperature());
+                break;
+            case TYPE_DETAIL:
+                DetailHolder detailHolder = (DetailHolder) holder;
+                detailHolder.horizontalScrollView.setToday24HourView(detailHolder.hourView);
+                detailHolder.hourView.initHourItems(mWeatherModel.getResult());
+
                 break;
         }
 
@@ -60,14 +71,17 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public int getItemViewType(int position) {
         if (position == 0) {
             return TYPE_HEADER;
-        } else {
+        } else if (position == 5){
+            return TYPE_DETAIL;
+        }
+        else {
             return TYPE_ITEM;
         }
 
     }
 
-     class ViewHolder extends RecyclerView.ViewHolder {
-        public ViewHolder(View itemView) {
+     class InfoHolder extends RecyclerView.ViewHolder {
+        public InfoHolder(View itemView) {
             super(itemView);
         }
     }
@@ -77,6 +91,17 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public HeaderHolder(View itemView) {
             super(itemView);
             txt_temperature = (TextView) itemView.findViewById(R.id.txt_temprature);
+        }
+
+    }
+    class DetailHolder extends RecyclerView.ViewHolder{
+        IndexHorizontalScrollView horizontalScrollView;
+        Today24HourView hourView;
+
+        public DetailHolder(View itemView) {
+            super(itemView);
+            horizontalScrollView = (IndexHorizontalScrollView) itemView.findViewById(R.id.index_scroll);
+            hourView = (Today24HourView) itemView.findViewById(R.id.hourView);
         }
     }
 }
