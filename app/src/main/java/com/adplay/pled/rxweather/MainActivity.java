@@ -22,8 +22,6 @@ public class MainActivity extends BaseActivity implements MainView {
     private RecyclerView mRecyclerView;
     private BlurredView mBlurredView;
     private TextView txt_address;
-    private Today24HourView hourView;
-    private IndexHorizontalScrollView indexHorizontalScrollView;
     private int mScrollerY;
 
     private int mAlpha;
@@ -39,11 +37,8 @@ public class MainActivity extends BaseActivity implements MainView {
     }
 
     private void initView() {
-//        hourView = (Today24HourView) findViewById(R.id.hourView);
-//        indexHorizontalScrollView = (IndexHorizontalScrollView) findViewById(R.id.scrollview);
         txt_address = (TextView) findViewById(R.id.txt_address);
-//        indexHorizontalScrollView.setToday24HourView(hourView);
-               mRecyclerView = (RecyclerView) findViewById(R.id.weather_info);
+        mRecyclerView = (RecyclerView) findViewById(R.id.weather_info);
         mBlurredView = (BlurredView) findViewById(R.id.blurview);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

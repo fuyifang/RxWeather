@@ -3,13 +3,12 @@ package com.adplay.pled.rxweather.model;
 import java.util.List;
 
 /**
- * Created by PLED on 2016/10/28.
+ * Created by PLED on 2016/11/3.
  */
 public class WeatherModel {
 
 
     private String retCode;
-
 
     private List<ResultBean> result;
 
@@ -49,7 +48,14 @@ public class WeatherModel {
         private String weather;
         private String week;
         private String wind;
-
+        /**
+         * date : 2016-11-03
+         * dayTime : 晴
+         * night : 晴
+         * temperature : 17°C / 10°C
+         * week : 今天
+         * wind : 东风 小于3级
+         */
 
         private List<FutureBean> future;
 
