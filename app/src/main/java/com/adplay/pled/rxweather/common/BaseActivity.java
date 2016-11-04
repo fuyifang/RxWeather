@@ -1,11 +1,10 @@
 package com.adplay.pled.rxweather.common;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 import rx.subscriptions.CompositeSubscription;
 
@@ -14,7 +13,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class BaseActivity extends AppCompatActivity {
     Toast toast;
-    private Activity mActivity;
+    protected Context mContext;
     public ProgressDialog progressDialog;
     private CompositeSubscription mCompositeSubscription;
 
@@ -22,12 +21,12 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivity = this;
+        mContext = this;
 
     }
     public void showToast(String msg){
         if (toast == null){
-            toast = Toast.makeText(mActivity,msg,Toast.LENGTH_SHORT);
+            toast = Toast.makeText(mContext,msg,Toast.LENGTH_SHORT);
         }else {
             toast.setText(msg);
         }
@@ -35,7 +34,7 @@ public class BaseActivity extends AppCompatActivity {
 
     }
     public ProgressDialog showProgressDialog(CharSequence message) {
-        progressDialog = new ProgressDialog(mActivity);
+        progressDialog = new ProgressDialog(mContext);
         progressDialog.setMessage(message);
         progressDialog.show();
         return progressDialog;

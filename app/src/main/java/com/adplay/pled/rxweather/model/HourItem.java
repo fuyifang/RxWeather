@@ -10,7 +10,7 @@ public class HourItem {
 
     private  String time; //时间点
     private Rect windyBoxRect; //表示风力的box
-    private int windy; //风力
+    private String windy; //风力
     private int temperature; //温度
     private Point tempPoint; //温度的点坐标
 
@@ -38,11 +38,11 @@ public class HourItem {
         this.windyBoxRect = windyBoxRect;
     }
 
-    public int getWindy() {
+    public String getWindy() {
         return windy;
     }
 
-    public void setWindy(int windy) {
+    public void setWindy(String windy) {
         this.windy = windy;
     }
 

@@ -22,7 +22,7 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final Context context;
     private static final int ITEM_COUNT = 10;
-
+    int first = 0;
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
     private static final int TYPE_DETAIL = 2;
@@ -46,18 +46,23 @@ public class WeatherInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Log.e("Tag",getItemViewType(position)+"itemtype");
         switch (getItemViewType(position)){
             case TYPE_HEADER:
                 HeaderHolder headerHolder = (HeaderHolder) holder;
                 headerHolder.txt_temperature.setText(mWeatherModel.getResult().get(0).getTemperature());
                 break;
             case TYPE_DETAIL:
-                DetailHolder detailHolder = (DetailHolder) holder;
-                detailHolder.horizontalScrollView.setToday24HourView(detailHolder.hourView);
-                detailHolder.hourView.initHourItems(mWeatherModel.getResult());
-
+                Log.e("Tag","type_detail"+first);
+                //避免多次调用导致多次重绘
+                if (first == 0){
+                    DetailHolder detailHolder = (DetailHolder) holder;
+                    //TODO 解决温度变化大的绘制问题
+                    detailHolder.hourView.initHourItems(mWeatherModel.getResult().get(0).getFuture());
+                    detailHolder.horizontalScrollView.setToday24HourView(detailHolder.hourView);
+                }
+                first++;
                 break;
+
         }
 
     }

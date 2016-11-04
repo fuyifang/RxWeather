@@ -1,5 +1,6 @@
 package com.adplay.pled.rxweather.common;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.adplay.pled.rxweather.retrofit.ApiStores;
@@ -17,9 +18,11 @@ import rx.subscriptions.CompositeSubscription;
 public class BasePresenter<V> {
     public V mvpView;
     protected ApiStores apiStores;
+    protected Context mContext;
     private CompositeSubscription mCompositeSubscription;
 
-    public void attachView(V mvpView){
+    public void attachView(V mvpView,Context context){
+        this.mContext = context;
         this.mvpView = mvpView;
         apiStores = AppClient.retrofit().create(ApiStores.class);
     }

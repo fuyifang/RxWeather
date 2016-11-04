@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.adplay.pled.rxweather.R;
@@ -25,17 +26,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by user on 2016/10/19.
  */
-public class Today24HourView extends View{
+public class Today24HourView extends View {
     private static final String TAG = "Today24HourView";
-    private static final int ITEM_SIZE = 24;  //24小时
+    private static final int ITEM_SIZE = 7;  //24小时
     private static final int ITEM_WIDTH = 140; //每个Item的宽度
     private static final int MARGIN_LEFT_ITEM = 50; //左边预留宽度
     private static final int MARGIN_RIGHT_ITEM = 50; //右边预留宽度
-    List<WeatherModel.ResultBean> mResult;
+    List<WeatherModel.ResultBean.FutureBean> mResult;
 
     private static final int windyBoxAlpha = 80;
     private static final int windyBoxMaxHeight = 80;
@@ -48,6 +51,7 @@ public class Today24HourView extends View{
     private int tempBaseBottom; //温度折线的下边Y坐标
     private Paint bitmapPaint, windyBoxPaint, linePaint, pointPaint, dashLinePaint;
     private TextPaint textPaint;
+    private String temprature;
 
     private List<HourItem> listItems;
     private int maxScrollOffset = 0;//滚动条最长滚动距离
@@ -69,11 +73,11 @@ public class Today24HourView extends View{
             3, 4, 4, 4, 4,
             2, 2, 2, 3, 3,
             3, 5, 5, 5};
-    private static final int WEATHER_RES[] ={R.drawable.w_sun, R.drawable.w1, R.drawable.w3, -1, -1
-            ,R.drawable.w5, R.drawable.w7, R.drawable.w9, -1, -1
-            ,-1, R.drawable.w10, R.drawable.w15, -1, -1
-            ,-1, -1, -1, -1, -1
-            ,R.drawable.w18, -1, -1, R.drawable.w19};
+    private static final int WEATHER_RES[] = {R.drawable.w_sun, R.drawable.w1, R.drawable.w3, -1, -1
+            , R.drawable.w5, R.drawable.w7, R.drawable.w9, -1, -1
+            , -1, R.drawable.w10, R.drawable.w15, -1, -1
+            , -1, -1, -1, -1, -1
+            , R.drawable.w18, -1, -1, R.drawable.w19};
 
 
     public Today24HourView(Context context) {
@@ -92,19 +96,9 @@ public class Today24HourView extends View{
     private void init() {
         mWidth = MARGIN_LEFT_ITEM + MARGIN_RIGHT_ITEM + ITEM_SIZE * ITEM_WIDTH;
         mHeight = 400; //暂时先写死
-        tempBaseTop = (400 - bottomTextHeight)/4;
-        tempBaseBottom = (400 - bottomTextHeight)*2/3;
+        tempBaseTop = (400 - bottomTextHeight) / 4;
+        tempBaseBottom = (400 - bottomTextHeight) * 2 / 3;
         listItems = new ArrayList<>();
-        new Timer()
-                .schedule(new TimerTask() {
-        @Override
-      public void run() {
-//            initHourItems();
-            //子线程重绘....
-            postInvalidate();
-
-        }
-        },2000);
         initPaint();
     }
 
@@ -143,29 +137,35 @@ public class Today24HourView extends View{
     }
 
     //简单初始化下，后续改为由外部传入
-    public void initHourItems(List<WeatherModel.ResultBean> result){
+    public void initHourItems(List<WeatherModel.ResultBean.FutureBean> result) {
+        Log.e("Tag","initHourItems");
         this.mResult = result;
-        for(int i=0; i<ITEM_SIZE; i++){
-            String time;
-            if(i<10){
-                time = "0" + i + ":00";
-            } else {
-                time = i + ":00";
-            }
-            int left =MARGIN_LEFT_ITEM  +  i * ITEM_WIDTH;
+        for (int i = 0; i < ITEM_SIZE; i++) {
+            String wind = mResult.get(i).getWind();
+            //截取数字
+            String regEx="[^0-9]";
+            Pattern p = Pattern.compile(regEx);
+            Matcher m = p.matcher(wind);
+            String trim = m.replaceAll("").trim();
+            //截取数字
+            int left = MARGIN_LEFT_ITEM + i * ITEM_WIDTH;
             int right = left + ITEM_WIDTH - 1;
-            int top = (int)(mHeight -bottomTextHeight +
-                    (maxWindy - WINDY[i])*1.0/(maxWindy - minWindy)*windyBoxSubHight
+            int top = (int) (mHeight - bottomTextHeight +
+                    (maxWindy - Integer.parseInt(trim)) * 1.0 / (maxWindy - minWindy) * windyBoxSubHight
                     - windyBoxMaxHeight);
-            int bottom =  mHeight - bottomTextHeight;
+            int bottom = mHeight - bottomTextHeight;
             Rect rect = new Rect(left, top, right, bottom);
-            Point point = calculateTempPoint(left, right, TEMP[i]);
-
+            String temp = mResult.get(i).getTemperature();
+            //截取温度....万恶的mob数据
+            String[] split = temp.split("/");
+            String[] temp_str = split[0].split("°C");
+            temprature = temp_str[0];
+            Point point = calculateTempPoint(left, right, Integer.parseInt(temp_str[0]));
             HourItem hourItem = new HourItem();
             hourItem.setWindyBoxRect(rect);
-            hourItem.setTime(time);
-            hourItem.setWindy(WINDY[i]);
-            hourItem.setTemperature(TEMP[i]);
+            hourItem.setTime(mResult.get(i).getDate());
+            hourItem.setWindy(wind);
+            hourItem.setTemperature(Integer.parseInt(temp_str[0]));
             hourItem.setTempPoint(point);
             hourItem.setRes(WEATHER_RES[i]);
             listItems.add(hourItem);
@@ -173,11 +173,11 @@ public class Today24HourView extends View{
         postInvalidate();
     }
 
-    private Point calculateTempPoint(int left, int right, int temp){
+    private Point calculateTempPoint(int left, int right, int temp) {
         double minHeight = tempBaseTop;
         double maxHeight = tempBaseBottom;
-        double tempY = maxHeight - (temp - minTemp)* 1.0/(maxTemp - minTemp) * (maxHeight - minHeight);
-        Point point = new Point((left + right)/2, (int)tempY);
+        double tempY = maxHeight - (temp - minTemp) * 1.0 / (maxTemp - minTemp) * (maxHeight - minHeight);
+        Point point = new Point((left + right) / 2, (int) tempY);
         return point;
     }
 
@@ -195,7 +195,7 @@ public class Today24HourView extends View{
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        for(int i=0; i<listItems.size(); i++){
+        for (int i = 0; i < listItems.size(); i++) {
             Rect rect = listItems.get(i).getWindyBoxRect();
             Point point = listItems.get(i).getTempPoint();
             //画风力的box和提示文字
@@ -203,7 +203,7 @@ public class Today24HourView extends View{
             //画温度的点
             onDrawTemp(canvas, i);
             //画表示天气图片
-            if(listItems.get(i).getRes() != -1 && i != currentItemIndex){
+            if (listItems.get(i).getRes() != -1 && i != currentItemIndex) {
                 Drawable drawable = ContextCompat.getDrawable(getContext(), listItems.get(i).getRes());
                 drawable.setBounds(point.x - DisplayUtil.dip2px(getContext(), 10),
                         point.y - DisplayUtil.dip2px(getContext(), 25),
@@ -233,7 +233,7 @@ public class Today24HourView extends View{
         Point point = item.getTempPoint();
         canvas.drawCircle(point.x, point.y, 10, pointPaint);
 
-        if(currentItemIndex == i) {
+        if (currentItemIndex == i) {
             //计算提示文字的运动轨迹
             int Y = getTempBarY();
             //画出背景图片
@@ -245,18 +245,18 @@ public class Today24HourView extends View{
             drawable.draw(canvas);
             //画天气
             int res = findCurrentRes(i);
-            if(res != -1) {
+            if (res != -1) {
                 Drawable drawTemp = ContextCompat.getDrawable(getContext(), res);
-                drawTemp.setBounds(getScrollBarX()+ITEM_WIDTH/2 + (ITEM_WIDTH/2 - DisplayUtil.dip2px(getContext(), 18))/2,
+                drawTemp.setBounds(getScrollBarX() + ITEM_WIDTH / 2 + (ITEM_WIDTH / 2 - DisplayUtil.dip2px(getContext(), 18)) / 2,
                         Y - DisplayUtil.dip2px(getContext(), 23),
-                        getScrollBarX()+ITEM_WIDTH - (ITEM_WIDTH/2 - DisplayUtil.dip2px(getContext(), 18))/2,
+                        getScrollBarX() + ITEM_WIDTH - (ITEM_WIDTH / 2 - DisplayUtil.dip2px(getContext(), 18)) / 2,
                         Y - DisplayUtil.dip2px(getContext(), 5));
                 drawTemp.draw(canvas);
 
             }
             //画出温度提示
-            int offset = ITEM_WIDTH/2;
-            if(res == -1)
+            int offset = ITEM_WIDTH / 2;
+            if (res == -1)
                 offset = ITEM_WIDTH;
             Rect targetRect = new Rect(getScrollBarX(), Y - DisplayUtil.dip2px(getContext(), 24)
                     , getScrollBarX() + offset, Y - DisplayUtil.dip2px(getContext(), 4));
@@ -268,10 +268,10 @@ public class Today24HourView extends View{
     }
 
     private int findCurrentRes(int i) {
-        if(listItems.get(i).getRes() != -1)
+        if (listItems.get(i).getRes() != -1)
             return listItems.get(i).getRes();
-        for(int k=i; k>=0; k--){
-            if(listItems.get(k).getRes() != -1)
+        for (int k = i; k >= 0; k--) {
+            if (listItems.get(k).getRes() != -1)
                 return listItems.get(k).getRes();
         }
         return -1;
@@ -282,7 +282,7 @@ public class Today24HourView extends View{
         // 新建一个矩形
         RectF boxRect = new RectF(rect);
         HourItem item = listItems.get(i);
-        if(i == currentItemIndex) {
+        if (i == currentItemIndex) {
             windyBoxPaint.setAlpha(255);
             canvas.drawRoundRect(boxRect, 4, 4, windyBoxPaint);
             //画出box上面的风力提示文字
@@ -291,7 +291,7 @@ public class Today24HourView extends View{
             Paint.FontMetricsInt fontMetrics = textPaint.getFontMetricsInt();
             int baseline = (targetRect.bottom + targetRect.top - fontMetrics.bottom - fontMetrics.top) / 2;
             textPaint.setTextAlign(Paint.Align.CENTER);
-            canvas.drawText("风力" + item.getWindy() + "级", targetRect.centerX(), baseline, textPaint);
+            canvas.drawText(item.getWindy(), targetRect.centerX(), baseline, textPaint);
         } else {
             windyBoxPaint.setAlpha(windyBoxAlpha);
             canvas.drawRoundRect(boxRect, 4, 4, windyBoxPaint);
@@ -303,14 +303,14 @@ public class Today24HourView extends View{
         linePaint.setColor(Color.YELLOW);
         linePaint.setStrokeWidth(3);
         Point point = listItems.get(i).getTempPoint();
-        if(i != 0){
-            Point pointPre = listItems.get(i-1).getTempPoint();
+        if (i != 0) {
+            Point pointPre = listItems.get(i - 1).getTempPoint();
             Path path = new Path();
             path.moveTo(pointPre.x, pointPre.y);
-            if(i % 2 == 0)
-                path.cubicTo((pointPre.x+point.x)/2, (pointPre.y+point.y)/2-7, (pointPre.x+point.x)/2, (pointPre.y+point.y)/2+7, point.x, point.y);
+            if (i % 2 == 0)
+                path.cubicTo((pointPre.x + point.x) / 2, (pointPre.y + point.y) / 2 - 7, (pointPre.x + point.x) / 2, (pointPre.y + point.y) / 2 + 7, point.x, point.y);
             else
-                path.cubicTo((pointPre.x+point.x)/2, (pointPre.y+point.y)/2+7, (pointPre.x+point.x)/2, (pointPre.y+point.y)/2-7, point.x, point.y);
+                path.cubicTo((pointPre.x + point.x) / 2, (pointPre.y + point.y) / 2 + 7, (pointPre.x + point.x) / 2, (pointPre.y + point.y) / 2 - 7, point.x, point.y);
             canvas.drawPath(path, linePaint);
         }
     }
@@ -329,7 +329,7 @@ public class Today24HourView extends View{
     }
 
 
-    public void drawLeftTempText(Canvas canvas, int offset){
+    public void drawLeftTempText(Canvas canvas, int offset) {
         //画最左侧的文字
         textPaint.setTextAlign(Paint.Align.LEFT);
         canvas.drawText(maxTemp + "°", DisplayUtil.dip2px(getContext(), 6) + offset, tempBaseTop, textPaint);
@@ -337,7 +337,7 @@ public class Today24HourView extends View{
     }
 
     //设置scrollerView的滚动条的位置，通过位置计算当前的时段
-    public void setScrollOffset(int offset, int maxScrollOffset){
+    public void setScrollOffset(int offset, int maxScrollOffset) {
         this.maxScrollOffset = maxScrollOffset;
         scrollOffset = offset;
         int index = calculateItemIndex(offset);
@@ -346,43 +346,43 @@ public class Today24HourView extends View{
     }
 
     //通过滚动条偏移量计算当前选择的时刻
-    private int calculateItemIndex(int offset){
+    private int calculateItemIndex(int offset) {
 //        Log.d(TAG, "maxScrollOffset = " + maxScrollOffset + "  scrollOffset = " + scrollOffset);
         int x = getScrollBarX();
-        int sum = MARGIN_LEFT_ITEM  - ITEM_WIDTH/2;
-        for(int i=0; i<ITEM_SIZE; i++){
+        int sum = MARGIN_LEFT_ITEM - ITEM_WIDTH / 2;
+        for (int i = 0; i < ITEM_SIZE; i++) {
             sum += ITEM_WIDTH;
-            if(x < sum)
+            if (x < sum)
                 return i;
         }
         return ITEM_SIZE - 1;
     }
 
-    private int getScrollBarX(){
+    private int getScrollBarX() {
         int x = (ITEM_SIZE - 1) * ITEM_WIDTH * scrollOffset / maxScrollOffset;
         x = x + MARGIN_LEFT_ITEM;
         return x;
     }
 
     //计算温度提示文字的运动轨迹
-    private int getTempBarY(){
+    private int getTempBarY() {
         int x = getScrollBarX();
-        int sum = MARGIN_LEFT_ITEM ;
+        int sum = MARGIN_LEFT_ITEM;
         Point startPoint = null, endPoint;
         int i;
-        for(i=0; i<ITEM_SIZE; i++){
+        for (i = 0; i < ITEM_SIZE; i++) {
             sum += ITEM_WIDTH;
-            if(x < sum) {
+            if (x < sum) {
                 startPoint = listItems.get(i).getTempPoint();
                 break;
             }
         }
-        if(i+1 >= ITEM_SIZE || startPoint == null)
-            return listItems.get(ITEM_SIZE-1).getTempPoint().y;
-        endPoint = listItems.get(i+1).getTempPoint();
+        if (i + 1 >= ITEM_SIZE || startPoint == null)
+            return listItems.get(ITEM_SIZE - 1).getTempPoint().y;
+        endPoint = listItems.get(i + 1).getTempPoint();
 
         Rect rect = listItems.get(i).getWindyBoxRect();
-        int y = (int)(startPoint.y + (x - rect.left)*1.0/ITEM_WIDTH * (endPoint.y - startPoint.y));
+        int y = (int) (startPoint.y + (x - rect.left) * 1.0 / ITEM_WIDTH * (endPoint.y - startPoint.y));
         return y;
     }
 

@@ -15,7 +15,7 @@ public interface ApiStores {
 
 
     @GET("query")
-    Observable<WeatherModel> getWeatherByAddress(@Query("province") String province, @Query("city") String city);
+    Observable<WeatherModel> getWeatherByAddress(@Query("key") String key,@Query("province") String province, @Query("city") String city);
     //uri=http://apicloud.mob.com/v1/weather/ip?&key=520520test&ip=219.134.48.105
     @GET("ip")
     Observable<WeatherModel> getWeatherByIp(@Query("key") String key, @Query("ip") String ip);
